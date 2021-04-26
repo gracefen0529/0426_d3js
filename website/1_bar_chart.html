@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>1_bar_chart</title>
+
+<style type="text/css">
+*{
+	border: 1px;
+}
+
+	.amount, .name { 
+        font-size: 8px; 	
+		text-anchor: middle;
+	}
+
+	.axis {
+		margin-right: 10px;
+	}
+
+	.axis path, .axis line {
+        stroke: rgb(196, 196, 196); 
+	}
+
+	.axis text { 
+        font-size: 8px; 
+        fill: rgb(196, 196, 196); 
+		
+	}
+	
+
+</style>
+
+<script type="text/javascript" src="d3/d3.js" charset="utf-8"></script>	
+<!--<script type="text/javascript" src="https://d3js.org/d3.v4.min.js" ></script>-->
+
+
+<script type="text/javascript">
+
+	function draw(dataset, svg_w, svg_h, svg_padding, id_svg_main){
+
+		console.log("dataset", dataset);
+
+		var names = dataset.map(function (d) { return d.name; });
+		var amounts = dataset.map(function (d) { return d.amount; });
+
+		console.log("names", names);
+		console.log("amounts", amounts);
+
+		var max = d3.max(dataset, function (d) { return d.amount; });
+				
+		// set scale
+		var scaleX = d3.scaleBand()
+				            .domain(names)
+							.range([svg_padding, svg_w - svg_padding-120])
+							
+							// .paddingInner(0);		
+		
+		var scaleY = d3.scaleLinear()
+				            .domain([0, max])
+				            .range([svg_h - svg_padding, svg_padding]);
+							
+			
+		var scaleBlue = d3.scaleLinear()
+				            .domain([0, max])
+				            .range([0, 255,]);
+							
+		
+		// create svg
+		var svg = d3.select(id_svg_main)
+						.append("svg")
+							.attr("width", svg_w)
+							.attr("height", svg_h)	
+		
+		// draw histogram
+		svg.selectAll("rect")
+				.data(dataset)
+				.enter()
+				.append("rect")
+	                .attr("x", function (d) { return scaleX(d.name); } )
+	                .attr("y", function (d) { return scaleY(d.amount); } )
+				    .attr("width",20 + "px") //.attr("width", scaleX.bandwidth() ) 
+	                .attr("height", function (d, i) { return svg_h - svg_padding - scaleY(d.amount); } ) // original point of y axis is in the top
+				    .attr("fill", function (d) { return "rgb(100, 230, " + scaleBlue(d.amount) + ")"; });
+
+		// draw text
+		svg.selectAll("text.amount")
+				.data(dataset)
+				.enter()
+				.append("text")
+	                .attr("class", "amount")
+	                .attr("x", function (d, i) { return scaleX(d.name) + 10; }) //.attr("x", function (d, i) { return scaleX(d.name) + scaleX.bandwidth() / 2; }) 
+	                .attr("y", function (d, i) { return scaleY(d.amount) - 5; })
+				    .attr("fill", function (d) { return "rgb(100, 230, " + scaleBlue(d.amount) + ")"; })
+	                .text(function (d, i) { return d.amount; });
+
+		// draw name
+		svg.selectAll("text.name")
+				.data(dataset)
+				.enter()
+				.append("text")
+	                .attr("class", "name")
+	                .attr("x", function (d, i) { return scaleX(d.name) + 10; }) //.attr("x", function (d, i) { return scaleX(d.name) + scaleX.bandwidth() / 2; }) 
+	                .attr("y", svg_h - svg_padding + 14)
+				    .attr("fill", function (d) { return "rgb(100, 230, " + scaleBlue(d.amount) + ")"; })
+	                .text(function (d, i) { return d.name;_ });
+		
+	
+		// draw x axis
+		// var axisX = d3.axisBottom(scaleX);
+		
+		// svg.append("g")
+		// 		.attr("class","x axis")
+		// 		.attr("transform","translate(0," + (svg_h - svg_padding) + ")")
+	    //         .call(axisX);
+	
+
+		// draw y axis
+        var axisY = d3.axisLeft(scaleY)
+            			.ticks(5);
+
+        svg.append("g")
+	            .attr("class", "y axis")
+	            .attr("transform", "translate(" + 340+ ",0)")
+	            .call(axisY);
+ 	}
+
+</script>
+
+</head>
+<body>
+
+<div id="div_main" style="width: 500px; height:600px; margin: 50px auto;transform: rotate(90deg);"></div>
+
+<script type="text/javascript">
+    
+    var dataset =
+        [
+         { name: "2012", amount: 10 }, 
+         { name: "2013", amount: 20 }, 
+         { name: "2014", amount: 40 }, 
+         { name: "2015", amount: 70 }, 
+         { name: "2016", amount: 50 }, 
+         { name: "2017", amount: 60 }, 
+         { name: "2018", amount: 30 }, 
+         { name: "2019", amount: 70 },
+         { name: "2020", amount: 90 }
+        ];
+
+    var w = document.getElementById("div_main").offsetWidth;
+    var h = document.getElementById("div_main").offsetHeight;
+
+    draw(dataset, w, h, w * 0.15, "#div_main");
+
+</script>
+
+</body>
+</html>
